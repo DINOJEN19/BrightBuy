@@ -355,11 +355,11 @@ SELECT p.product_id, 'BB-0094', 'SmartKid Globe Explorer Default', NULL, NULL, 3
 -- values below.
 -- -----------------------------------------------------------------
 INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city) VALUES
-  ('Nimal Perera', 'nimal.perera@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '0771234567', '12 Galle Road', 'Colombo'),
-  ('Sanduni Fernando', 'sanduni.fernando@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '0712345678', '45 Kandy Road', 'Kandy'),
-  ('Kasun Silva', 'kasun.silva@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '0723456789', '8 Main Street', 'Galle'),
-  ('Ishara Jayawardena', 'ishara.j@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '0754567890', '21 Temple Lane', 'Negombo'),
-  ('Ruwan Bandara', 'ruwan.bandara@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '0765678901', '3 Lake Road', 'Kurunegala');
+  ('James Miller', 'james.miller@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '5125550101', '1204 Congress Ave', 'Austin'),
+  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '7135550102', '4502 Main St', 'Houston'),
+  ('Michael Johnson', 'michael.j@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '2145550103', '808 Elm St', 'Dallas'),
+  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '9155550104', '2100 Mesa St', 'El Paso'),
+  ('David Martinez', 'david.martinez@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '8065550105', '303 Broadway St', 'Lubbock');
 
 COMMIT;
 
@@ -395,8 +395,8 @@ COMMIT;
 --     inline literals inside fn_calculate_delivery_estimate (Task 3),
 --     which is explicitly allowed as a fallback per the guide.
 -- =====================================================================
--- INSERT INTO MAIN_CITY (city_name) VALUES
---   ('Houston'), ('Dallas'), ('Austin'), ('San Antonio'), ('Fort Worth');
+INSERT INTO MAIN_CITY (city_name) VALUES
+  ('Houston'), ('Dallas'), ('Austin'), ('San Antonio'), ('Fort Worth');
 
 -- =====================================================================
 -- Step 7: Verification queries -- run these after the script completes

@@ -7,18 +7,6 @@
 
 USE brightbuy;
 
--- ---------------------------------------------------------------------
--- Prerequisite: main-cities reference data (MAIN_CITY was added to the
--- schema as an extension). INSERT IGNORE makes this safe to re-run
--- because city_name is UNIQUE. If you uncomment the same block in
--- 02_seeds.sql, you can delete this one.
--- ---------------------------------------------------------------------
-INSERT IGNORE INTO MAIN_CITY (city_name) VALUES
-  ('Houston'),
-  ('Dallas'),
-  ('Austin'),
-  ('San Antonio'),
-  ('Fort Worth');
 
 DELIMITER $$
 

@@ -33,6 +33,7 @@ PROC_BODY: BEGIN
         RESIGNAL;
     END;
 
+    START TRANSACTION;
     -- =========================================================================
     -- PRECONDITIONS CHECK (Executed before touching or modifying data)
     -- =========================================================================
@@ -68,7 +69,6 @@ PROC_BODY: BEGIN
     -- =========================================================================
     -- TRANSACTIONAL EXECUTION
     -- =========================================================================
-    START TRANSACTION;
 
     -- Step 2: Lock all referenced VARIANT rows for this cart to prevent race conditions
     SELECT v.variant_id 
