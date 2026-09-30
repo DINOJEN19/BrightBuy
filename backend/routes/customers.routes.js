@@ -1,6 +1,4 @@
-// routes/customers.routes.js
-// Owned by Person 1.
-// Mounts under /api/v1/customers via app.js.
+
 
 'use strict';
 

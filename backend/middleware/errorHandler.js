@@ -1,7 +1,4 @@
-// middleware/errorHandler.js
-// Owned by Person 1 — mounted LAST in app.js so it catches errors from all routes.
-// Maps MySQL SIGNAL SQLSTATE '45000' errors (business-rule violations from stored
-// procedures and triggers) to HTTP 422, and everything else to HTTP 500.
+
 
 'use strict';
 

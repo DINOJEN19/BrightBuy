@@ -1,6 +1,4 @@
-// routes/auth.routes.js
-// Owned by Person 1.
-// Mounts under /api/v1/auth via app.js.
+
 
 'use strict';
 

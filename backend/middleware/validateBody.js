@@ -1,8 +1,3 @@
-// middleware/validateBody.js
-// Owned by Person 1 — consumed by all route modules.
-// Factory that returns an Express middleware validating req.body against a Joi schema.
-// Any validation failure is short-circuited with a 400 VALIDATION_ERROR before reaching
-// the controller, so controllers can assume req.body is clean.
 
 'use strict';
 

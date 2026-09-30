@@ -44,13 +44,7 @@ exports.login = async (req, res, next) => {
   }
 };
 
-/**
- * POST /api/v1/auth/logout
- * Auth required: Customer (authenticateJWT must run before this)
- * Success: 204 No Content
- * Note: JWTs are stateless — the real invalidation is client-side token deletion.
- * A server-side blacklist can be added here later without changing the interface.
- */
+
 exports.logout = async (req, res, next) => {
   try {
     // Client is responsible for discarding the token.

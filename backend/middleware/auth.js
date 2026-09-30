@@ -6,13 +6,7 @@
 
 const jwt = require('jsonwebtoken');
 
-/**
- * authenticateJWT
- * Verifies the Bearer token present in the Authorization header.
- * On success, attaches the decoded payload to req.user:
- *   { customerId, role, iat, exp }
- * On failure, returns 401.
- */
+
 function authenticateJWT(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -33,16 +27,7 @@ function authenticateJWT(req, res, next) {
   }
 }
 
-/**
- * requireRole(...roles)
- * Factory that returns middleware enforcing that req.user.role is one of the
- * allowed roles. Must be called AFTER authenticateJWT in the middleware chain.
- * Roles: 'CUSTOMER', 'WAREHOUSE_STAFF', 'ADMIN'
- *
- * Usage:
- *   router.post('/admin/something', authenticateJWT, requireRole('ADMIN'), ctrl.handler);
- *   router.post('/stock', authenticateJWT, requireRole('WAREHOUSE_STAFF', 'ADMIN'), ctrl.handler);
- */
+
 function requireRole(...roles) {
   return function (req, res, next) {
     if (!req.user) {
