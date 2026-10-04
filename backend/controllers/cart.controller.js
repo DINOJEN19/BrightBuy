@@ -24,6 +24,23 @@ exports.getCart = async (req, res, next) => {
     return next(err);
   }
 };
+exports.checkout = async (req, res, next) => {
+  try {
+    const result = await checkoutService.placeOrder(
+      req.user.customerId,
+      req.body,
+    );
+    return res.status(201).json({ data: result });
+  } catch (err) {
+    if (err.code === "VALIDATION_ERROR") {
+      return res.status(400).json({
+        error: { code: "VALIDATION_ERROR", message: err.message },
+      });
+    }
+    // sp_PlaceOrder SIGNAL 45000 is handled by centralized errorHandler (mapped to HTTP 422)
+    next(err);
+  }
+};
 
 /**
  * POST /api/v1/cart/items
