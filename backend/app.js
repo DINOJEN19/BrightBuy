@@ -14,8 +14,8 @@ const authRoutes = require('./routes/auth.routes');
 const customersRoutes = require('./routes/customers.routes');
 // Persons 2-5: add your route requires below (do NOT edit anything else in this file)
 const catalogueRoutes  = require('./routes/catalogue.routes');
-// const cartRoutes       = require('./routes/cart.routes');
-// const checkoutRoutes   = require('./routes/checkout.routes');
+const cartRoutes       = require('./routes/cart.routes');
+const checkoutRoutes   = require('./routes/checkout.routes');
 // const ordersRoutes     = require('./routes/orders.routes');
 // const inventoryRoutes  = require('./routes/inventory.routes');
 // const reportsRoutes    = require('./routes/reports.routes');
@@ -41,8 +41,8 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/customers', customersRoutes);
 // Persons 2-5: mount your routes below (same pattern)
 app.use('/api/v1', catalogueRoutes);
-// app.use('/api/v1/cart',                 cartRoutes);
-// app.use('/api/v1/checkout',             checkoutRoutes);
+app.use('/api/v1/cart',                 cartRoutes);
+app.use('/api/v1/checkout',             checkoutRoutes);
 // app.use('/api/v1/orders',               ordersRoutes);
 // app.use('/api/v1/inventory',            inventoryRoutes);
 // app.use('/api/v1/reports',              reportsRoutes);
