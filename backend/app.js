@@ -16,10 +16,10 @@ const customersRoutes = require('./routes/customers.routes');
 const catalogueRoutes  = require('./routes/catalogue.routes');
 const cartRoutes       = require('./routes/cart.routes');
 const checkoutRoutes   = require('./routes/checkout.routes');
-// const ordersRoutes     = require('./routes/orders.routes');
-// const inventoryRoutes  = require('./routes/inventory.routes');
-// const reportsRoutes    = require('./routes/reports.routes');
-// const adminRoutes      = require('./routes/admin.routes');
+const ordersRoutes     = require('./routes/orders.routes');
+const inventoryRoutes  = require('./routes/inventory.routes');
+const reportsRoutes    = require('./routes/reports.routes');
+const adminRoutes      = require('./routes/admin.routes');
 
 const app = express();
 
@@ -43,10 +43,10 @@ app.use('/api/v1/customers', customersRoutes);
 app.use('/api/v1', catalogueRoutes);
 app.use('/api/v1/cart',                 cartRoutes);
 app.use('/api/v1/checkout',             checkoutRoutes);
-// app.use('/api/v1/orders',               ordersRoutes);
-// app.use('/api/v1/inventory',            inventoryRoutes);
-// app.use('/api/v1/reports',              reportsRoutes);
-// app.use('/api/v1/admin',                adminRoutes);
+app.use('/api/v1/orders',               ordersRoutes);
+app.use('/api/v1/inventory',            inventoryRoutes);
+app.use('/api/v1/reports',              reportsRoutes);
+app.use('/api/v1/admin',                adminRoutes);
 
 // ---------------------------------------------------------------------------
 // 404 catch-all (must come after all route mounts)
