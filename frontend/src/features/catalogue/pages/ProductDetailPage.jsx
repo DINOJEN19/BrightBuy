@@ -1,14 +1,17 @@
-// frontend/src/features/catalogue/pages/ProductDetailPage.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getProduct } from '../api';
+import client from '../../../api/client';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [addFeedback, setAddFeedback] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -27,6 +30,21 @@ const ProductDetailPage = () => {
     };
     fetchProduct();
   }, [id]);
+
+  const handleAddToCart = async () => {
+    if (!selectedVariant) return;
+    setAdding(true);
+    setAddFeedback('');
+    try {
+      await client.post('/cart/items', { variantId: selectedVariant.variantId, quantity: 1 });
+      setAddFeedback('Item added to cart!');
+      setTimeout(() => navigate('/cart'), 600);
+    } catch (err) {
+      setAddFeedback(err?.response?.data?.error?.message || 'Failed to add item to cart');
+    } finally {
+      setAdding(false);
+    }
+  };
 
   if (loading) return <p>Loading product...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
@@ -68,9 +86,24 @@ const ProductDetailPage = () => {
               <p style={{ color: selectedVariant.inStock > 0 ? 'green' : 'red' }}>
                 {selectedVariant.inStock > 0 ? `In Stock (${selectedVariant.inStock})` : 'Out of Stock'}
               </p>
-              <button disabled={selectedVariant.inStock <= 0} style={{ padding: '12px 24px', background: '#0056b3', color: 'white', border: 'none', borderRadius: '4px', cursor: selectedVariant.inStock > 0 ? 'pointer' : 'not-allowed', marginTop: '16px' }}>
-                Add to Cart
-              </button>
+              <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <button
+                  disabled={selectedVariant.inStock <= 0 || adding}
+                  onClick={handleAddToCart}
+                  style={{
+                    padding: '12px 24px',
+                    background: '#0056b3',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: selectedVariant.inStock > 0 ? 'pointer' : 'not-allowed',
+                    fontWeight: 600
+                  }}
+                >
+                  {adding ? 'Adding...' : 'Add to Cart'}
+                </button>
+                {addFeedback && <span style={{ color: addFeedback.includes('added') ? 'green' : 'red' }}>{addFeedback}</span>}
+              </div>
             </div>
           )}
         </div>
@@ -80,3 +113,4 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
+
