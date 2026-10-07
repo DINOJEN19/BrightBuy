@@ -39,7 +39,7 @@ async function register(data) {
     const [result] = await conn.query(
       `INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [fullName, email, passwordHash, phone, address, city]
+      [fullName, email, passwordHash, phone || '', address || '', city || '']
     );
 
     return { customerId: result.insertId, email };

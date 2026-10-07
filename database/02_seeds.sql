@@ -354,12 +354,14 @@ SELECT p.product_id, 'BB-0094', 'SmartKid Globe Explorer Default', NULL, NULL, 3
 -- (bcrypt is already a dependency in package.json) and replace the
 -- values below.
 -- -----------------------------------------------------------------
-INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city) VALUES
-  ('James Miller', 'james.miller@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '5125550101', '1204 Congress Ave', 'Austin'),
-  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '7135550102', '4502 Main St', 'Houston'),
-  ('Michael Johnson', 'michael.j@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '2145550103', '808 Elm St', 'Dallas'),
-  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '9155550104', '2100 Mesa St', 'El Paso'),
-  ('David Martinez', 'david.martinez@example.com', '$2b$10$PLACEHOLDERHASHVALUE0000000000000000000000000000000u', '8065550105', '303 Broadway St', 'Lubbock');
+INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city, role) VALUES
+  ('James Miller', 'james.miller@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550101', '1204 Congress Ave', 'Austin', 'CUSTOMER'),
+  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '7135550102', '4502 Main St', 'Houston', 'CUSTOMER'),
+  ('Michael Johnson', 'michael.j@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '2145550103', '808 Elm St', 'Dallas', 'CUSTOMER'),
+  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '9155550104', '2100 Mesa St', 'El Paso', 'CUSTOMER'),
+  ('David Martinez', 'david.martinez@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '8065550105', '303 Broadway St', 'Lubbock', 'CUSTOMER'),
+  ('Admin User', 'admin@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550199', '100 Admin Way', 'Austin', 'ADMIN'),
+  ('Warehouse Staff', 'staff@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550198', '200 Logistics Blvd', 'Dallas', 'WAREHOUSE_STAFF');
 
 COMMIT;
 

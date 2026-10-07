@@ -158,11 +158,15 @@ const ProductFormPage = () => {
         { sku: '', variantName: '', colour: '', memorySize: '', price: '', stockQuantity: '0' },
       ]);
     } catch (err) {
-      const code = err?.code || err?.response?.data?.error?.code;
-      const message = err?.message || err?.response?.data?.error?.message;
+      const code = err?.response?.data?.error?.code || err?.code;
+      const message = err?.response?.data?.error?.message || err?.message;
 
       if (code === 'SKU_TAKEN' || err?.response?.status === 409) {
         setSkuTakenError(message || 'This SKU is already in use.');
+      } else if (err?.response?.status === 403) {
+        setValidationError(
+          message || 'Access denied: Admin role required to create products. Please switch to the Admin role using the header toggle.'
+        );
       } else {
         setValidationError(message || 'Failed to create product.');
       }
@@ -205,7 +209,7 @@ const ProductFormPage = () => {
       const res = await updateVariant(vId, payload);
       setVariantUpdateResult(res.data?.data || {});
     } catch (err) {
-      const errMsg = err?.message || err?.response?.data?.error?.message;
+      const errMsg = err?.response?.data?.error?.message || err?.message;
       setValidationError(errMsg || 'Failed to update variant.');
     } finally {
       setIsSubmitting(false);

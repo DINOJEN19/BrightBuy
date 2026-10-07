@@ -61,11 +61,15 @@ const CategoryFormPage = () => {
       setCategoryName('');
       setDescription('');
     } catch (err) {
-      const code = err?.code || err?.response?.data?.error?.code;
-      const message = err?.message || err?.response?.data?.error?.message;
+      const code = err?.response?.data?.error?.code || err?.code;
+      const message = err?.response?.data?.error?.message || err?.message;
 
       if (code === 'CATEGORY_EXISTS' || err?.response?.status === 409) {
         setCategoryExistsError(message || 'A category with this name already exists.');
+      } else if (err?.response?.status === 403) {
+        setValidationError(
+          message || 'Access denied: Admin role required to create categories. Please switch to the Admin role using the header toggle.'
+        );
       } else {
         setValidationError(message || 'Failed to create category.');
       }

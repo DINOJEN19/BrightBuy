@@ -14,7 +14,7 @@ async function getProfile(customerId) {
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(
-      `SELECT customer_id, full_name, email, phone, address, city
+      `SELECT customer_id, full_name, email, phone, address, city, role
        FROM CUSTOMER
        WHERE customer_id = ?`,
       [customerId]
@@ -30,6 +30,7 @@ async function getProfile(customerId) {
       phone: c.phone,
       address: c.address,
       city: c.city,
+      role: c.role,
     };
   } finally {
     conn.release();

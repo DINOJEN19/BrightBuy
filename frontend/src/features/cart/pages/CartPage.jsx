@@ -2,34 +2,43 @@
 // Displays active cart line items, quantity edit, item removal, and subtotal.
 // Owned by Person 3.
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCart, updateItem, removeItem } from '../api';
+import { useAuth } from '../../../context/AuthContext';
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [cart, setCart] = useState({ cartId: null, items: [], total: 0 });
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [busyItemIds, setBusyItemIds] = useState([]);
 
-  const fetchCart = async () => {
-    setLoading(true);
-    setError(null);
+  const refreshCart = useCallback(async () => {
+    if (!isAuthenticated) return;
     try {
       const response = await getCart();
-      const cartData = response.data?.data || { cartId: null, items: [], total: 0 };
-      setCart(cartData);
+      setCart(response.data?.data || { cartId: null, items: [], total: 0 });
     } catch (err) {
-      setError(err?.message || 'Failed to load shopping cart. Please ensure you are logged in.');
-    } finally {
-      setLoading(false);
+      setError(err?.message || 'Failed to load shopping cart.');
     }
-  };
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    let active = true;
+    if (isAuthenticated) {
+      getCart()
+        .then((res) => {
+          if (active) setCart(res.data?.data || { cartId: null, items: [], total: 0 });
+        })
+        .catch((err) => {
+          if (active) setError(err?.message || 'Failed to load shopping cart.');
+        });
+    }
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
 
   const handleQuantityChange = async (cartItemId, newQty) => {
     if (newQty <= 0) return;
@@ -60,10 +69,96 @@ const CartPage = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading) {
     return (
       <div style={{ maxWidth: '1000px', margin: '40px auto', padding: '0 20px', textAlign: 'center' }}>
         <p style={{ fontSize: '18px', color: '#64748b' }}>Loading your shopping cart...</p>
+      </div>
+    );
+  }
+
+  // Guest view: prompt guest to log in or register to check out
+  if (!isAuthenticated) {
+    return (
+      <div style={{ maxWidth: '720px', margin: '48px auto', padding: '0 20px', textAlign: 'center' }}>
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
+          border: '1px solid #e2e8f0',
+          padding: '48px 32px',
+          boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.05)',
+        }}>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '64px',
+            height: '64px',
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #eef2ff 0%, #e0f2fe 100%)',
+            color: '#4f46e5',
+            fontSize: '32px',
+            marginBottom: '20px',
+          }}>
+            🛒
+          </div>
+
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', marginBottom: '12px' }}>
+            Shopping Cart & Checkout
+          </h2>
+
+          <p style={{ color: '#475569', fontSize: '15px', lineHeight: '1.6', maxWidth: '520px', margin: '0 auto 28px auto' }}>
+            You are browsing BrightBuy as a <strong>Guest</strong>.
+            <br />
+            Only registered customers can manage their cart, proceed to checkout, and place orders.
+          </p>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '24px' }}>
+            <Link
+              to="/login"
+              state={{ from: { pathname: '/checkout' } }}
+              style={{
+                backgroundColor: '#4f46e5',
+                color: '#ffffff',
+                padding: '12px 24px',
+                borderRadius: '10px',
+                fontWeight: '600',
+                fontSize: '14px',
+                textDecoration: 'none',
+                boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Sign In to Checkout
+            </Link>
+
+            <Link
+              to="/register"
+              style={{
+                backgroundColor: '#ffffff',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
+                padding: '12px 24px',
+                borderRadius: '10px',
+                fontWeight: '600',
+                fontSize: '14px',
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Register New Account
+            </Link>
+          </div>
+
+          <div>
+            <Link
+              to="/products"
+              style={{ color: '#64748b', fontSize: '14px', textDecoration: 'none', fontWeight: '500' }}
+            >
+              &larr; Continue Browsing Catalogue as Guest
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -75,7 +170,7 @@ const CartPage = () => {
           <p style={{ margin: 0, fontWeight: '600' }}>Error</p>
           <p style={{ margin: '4px 0 12px 0' }}>{error}</p>
           <button
-            onClick={fetchCart}
+            onClick={refreshCart}
             style={{ padding: '8px 16px', backgroundColor: '#b91c1c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
           >
             Try Again
