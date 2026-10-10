@@ -93,7 +93,7 @@ async function getTopSellingProducts({ from, to, limit } = {}) {
          JOIN VARIANT v ON oi.variant_id = v.variant_id
          JOIN PRODUCT p ON v.product_id = p.product_id
          JOIN CUSTOMER_ORDER co ON oi.order_id = co.order_id
-         WHERE co.order_date >= ? AND co.order_date <= ?
+         WHERE co.order_date >= ? AND co.order_date < DATE_ADD(?, INTERVAL 1 DAY)
          GROUP BY p.product_id, p.product_name
          ORDER BY total_quantity_sold DESC
          LIMIT ?`,

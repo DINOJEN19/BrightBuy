@@ -9,6 +9,8 @@
 const router = require('express').Router();
 const { authenticateJWT, requireRole } = require('../middleware/auth');
 const adminController = require('../controllers/admin.controller');
+const Joi=require('joi');
+const {validateBody}=require('../middleware/validateBody');
 
 // Enforce authentication and ADMIN role on all admin routes
 router.use(authenticateJWT, requireRole('ADMIN'));
@@ -20,6 +22,6 @@ router.post('/categories', adminController.createCategory);
 router.post('/products', adminController.createProduct);
 
 // PUT /api/v1/admin/variants/:variantId
-router.put('/variants/:variantId', adminController.updateVariant);
+router.put('/variants/:variantId', validateBody(Joi.object({variantName:Joi.string().trim().max(100),price:Joi.number().positive().max(99999999.99),status:Joi.string().valid('ACTIVE','DISCONTINUED')})), adminController.updateVariant);
 
 module.exports = router;

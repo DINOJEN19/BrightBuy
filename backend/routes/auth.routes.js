@@ -12,16 +12,17 @@ const ctrl = require('../controllers/auth.controller');
 
 const registerSchema = Joi.object({
   fullName: Joi.string().min(2).max(100).required(),
-  email: Joi.string().email().max(150).required(),
+  email: Joi.string().trim().email({ tlds: { allow: false } }).max(150).required(),
   password: Joi.string().min(8).max(72).required(), // bcrypt max is 72 bytes
   phone: Joi.string().max(20).optional().allow('', null),
   address: Joi.string().max(255).optional().allow('', null),
-  city: Joi.string().max(100).optional().allow('', null),
+  city: Joi.string().max(80).optional().allow('', null),
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string().email().required(),
+  email: Joi.string().trim().email({ tlds: { allow: false } }).required(),
   password: Joi.string().required(),
+  portal: Joi.string().valid('CUSTOMER','ADMIN').optional(),
 });
 
 // --- Routes ----------------------------------------------------------------

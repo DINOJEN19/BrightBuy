@@ -58,7 +58,7 @@ async function updateProfile(customerId, updates) {
   for (const [key, col] of Object.entries(fieldMap)) {
     if (updates[key] !== undefined) {
       setClauses.push(`${col} = ?`);
-      values.push(updates[key]);
+      values.push(updates[key] ?? '');
     }
   }
 
@@ -75,10 +75,10 @@ async function updateProfile(customerId, updates) {
       `UPDATE CUSTOMER SET ${setClauses.join(', ')} WHERE customer_id = ?`,
       values
     );
-    return getProfile(customerId);
   } finally {
     conn.release();
   }
+  return getProfile(customerId);
 }
 
 module.exports = { getProfile, updateProfile };

@@ -7,6 +7,8 @@
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const errorHandler = require('./middleware/errorHandler');
 
 // Route modules
@@ -46,9 +48,21 @@ app.use('/api/v1/checkout',             checkoutRoutes);
 app.use('/api/v1/orders',               ordersRoutes);
 app.use('/api/v1/inventory',            inventoryRoutes);
 app.use('/api/v1/reports',              reportsRoutes);
-app.use('/api/v1/admin',                adminRoutes);
+app.use('/api/v1/admin', require('./routes/productManagement.routes'));
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', require('./routes/productImages.routes'));
 
 // ---------------------------------------------------------------------------
+// Serve an optional production frontend build.
+const frontendBuild = path.resolve(__dirname, '../frontend/dist');
+if (fs.existsSync(path.join(frontendBuild, 'index.html'))) {
+  app.use(express.static(frontendBuild));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(frontendBuild, 'index.html'));
+  });
+}
+
 // 404 catch-all (must come after all route mounts)
 // ---------------------------------------------------------------------------
 app.use((req, res) => {

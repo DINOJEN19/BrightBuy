@@ -17,7 +17,8 @@ const BCRYPT_ROUNDS = 10;
  * @throws 409 EMAIL_TAKEN if the email already exists.
  */
 async function register(data) {
-  const { fullName, email, password, phone, address, city } = data;
+  const { fullName, email, password } = data;
+  const phone = data.phone ?? ''; const address = data.address ?? ''; const city = data.city ?? '';
 
   // Hash the password before storing (REQ-5.3)
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -39,7 +40,7 @@ async function register(data) {
     const [result] = await conn.query(
       `INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [fullName, email, passwordHash, phone || '', address || '', city || '']
+      [fullName, email, passwordHash, phone, address, city]
     );
 
     return { customerId: result.insertId, email };
@@ -54,7 +55,7 @@ async function register(data) {
  * @returns {{ token, expiresIn, customer }}
  * @throws 401 INVALID_CREDENTIALS on bad email/password.
  */
-async function login({ email, password }) {
+async function login({ email, password, portal }) {
   const conn = await pool.getConnection();
   try {
     const [rows] = await conn.query(
@@ -79,6 +80,10 @@ async function login({ email, password }) {
       err.status = 401;
       err.code = 'INVALID_CREDENTIALS';
       throw err;
+    }
+
+    if (portal && (portal==='ADMIN' ? customer.role!=='ADMIN' : customer.role==='ADMIN')) {
+      throw Object.assign(new Error('This account cannot sign in through the selected role. Choose the correct sign-in option.'), {status:403,code:'WRONG_PORTAL'});
     }
 
     const payload = {
