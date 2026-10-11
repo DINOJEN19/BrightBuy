@@ -1,16 +1,14 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite application. See the root `README.md` for the full database/API setup.
 
-Currently, two official plugins are available:
+```bash
+npm ci
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Open http://localhost:5173. The development proxy expects the API at http://127.0.0.1:3001.
 
-## React Compiler
+`npm run build` writes `dist`; the Express backend serves it automatically in production. The session token is kept in sessionStorage; protected routes restore the user via `/customers/me`. API failures and expired sessions are handled by `src/api/client.js`.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+`npm run test:ui` runs browser contract checks using mocked API responses. Install Chromium with `npx playwright install chromium` first and run the app at port 3001.
