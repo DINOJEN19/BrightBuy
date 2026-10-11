@@ -1,23 +1,32 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+// frontend/src/features/catalogue/pages/ProductDetailPage.jsx
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getProduct } from '../api';
-import client from '../../../api/client';
+import ProductImage from '../components/ProductImage';
+import { addItem } from '../../cart/api';
 import { useAuth } from '../../../context/AuthContext';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate(); const { user } = useAuth();
+  const [quantity, setQuantity] = useState(1);
+  const [adding, setAdding] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [cartError, setCartError] = useState('');
+  async function addToCart() {
+    if (!user) { navigate('/login', {state:{from:`/products/${id}`}}); return; }
+    setAdding(true); setFeedback(''); setCartError('');
+    try {await addItem({variantId:selectedVariant.variantId,quantity:Number(quantity)}); setFeedback('Added to your cart.');}
+    catch(err){setCartError(err.message);} finally{setAdding(false);}
+  }
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [adding, setAdding] = useState(false);
-  const [addFeedback, setAddFeedback] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
+      setLoading(true); setError(null); setFeedback(''); setCartError(''); setSelectedVariant(null);
       try {
         const response = await getProduct(id);
         const p = response.data.data;
@@ -25,7 +34,7 @@ const ProductDetailPage = () => {
         if (p.variants && p.variants.length > 0) {
           setSelectedVariant(p.variants[0]);
         }
-      } catch {
+      } catch (err) {
         setError('Product not found');
       } finally {
         setLoading(false);
@@ -34,31 +43,14 @@ const ProductDetailPage = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = async () => {
-    if (!selectedVariant) return;
-    if (!isAuthenticated) {
-      setAddFeedback('Please sign in or register as a customer to add items to your cart.');
-      return;
-    }
-    setAdding(true);
-    setAddFeedback('');
-    try {
-      await client.post('/cart/items', { variantId: selectedVariant.variantId, quantity: 1 });
-      setAddFeedback('Item added to cart!');
-      setTimeout(() => navigate('/cart'), 600);
-    } catch (err) {
-      setAddFeedback(err?.response?.data?.error?.message || 'Failed to add item to cart');
-    } finally {
-      setAdding(false);
-    }
-  };
-
   if (loading) return <p>Loading product...</p>;
   if (error) return <p style={{ color: 'red' }}>{error}</p>;
   if (!product) return null;
 
   return (
     <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+      <ProductImage key={product.productName} productName={product.productName} images={product.images} detail/>
+      <p className="product-image-caption">Illustrative product image. Variant colours and details may differ.</p>
       <h1>{product.productName}</h1>
       <p style={{ color: '#555', fontSize: '18px' }}>Brand: {product.brand}</p>
       <p>{product.description}</p>
@@ -70,7 +62,7 @@ const ProductDetailPage = () => {
             {product.variants.map((v) => (
               <button
                 key={v.variantId}
-                onClick={() => setSelectedVariant(v)}
+                onClick={() => {setSelectedVariant(v); setQuantity(1); setFeedback('');}}
                 style={{
                   padding: '8px 16px',
                   border: selectedVariant?.variantId === v.variantId ? '2px solid #0056b3' : '1px solid #ccc',
@@ -93,71 +85,12 @@ const ProductDetailPage = () => {
               <p style={{ color: selectedVariant.inStock > 0 ? 'green' : 'red' }}>
                 {selectedVariant.inStock > 0 ? `In Stock (${selectedVariant.inStock})` : 'Out of Stock'}
               </p>
-
-              {isAuthenticated ? (
-                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <button
-                    disabled={selectedVariant.inStock <= 0 || adding}
-                    onClick={handleAddToCart}
-                    style={{
-                      padding: '12px 24px',
-                      background: '#0056b3',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: selectedVariant.inStock > 0 ? 'pointer' : 'not-allowed',
-                      fontWeight: 600
-                    }}
-                  >
-                    {adding ? 'Adding...' : 'Add to Cart'}
-                  </button>
-                  {addFeedback && <span style={{ color: addFeedback.includes('added') ? 'green' : 'red' }}>{addFeedback}</span>}
-                </div>
-              ) : (
-                <div style={{
-                  marginTop: '20px',
-                  padding: '16px',
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                }}>
-                  <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#475569' }}>
-                    👋 Browsing as a <strong>Guest</strong>. Only registered customers can add items to cart and check out.
-                  </p>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Link
-                      to="/login"
-                      state={{ from: location }}
-                      style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#4f46e5',
-                        color: '#ffffff',
-                        borderRadius: '6px',
-                        textDecoration: 'none',
-                        fontWeight: '600',
-                        fontSize: '13px',
-                      }}
-                    >
-                      Sign In to Buy
-                    </Link>
-                    <Link
-                      to="/register"
-                      style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#ffffff',
-                        color: '#334155',
-                        border: '1px solid #cbd5e1',
-                        borderRadius: '6px',
-                        textDecoration: 'none',
-                        fontWeight: '600',
-                        fontSize: '13px',
-                      }}
-                    >
-                      Register as Customer
-                    </Link>
-                  </div>
-                </div>
-              )}
+              <label>Quantity <input aria-label="Quantity" type="number" min="1" max={selectedVariant.inStock} value={quantity} onChange={e=>setQuantity(e.target.value)} style={{width:90}}/></label>
+              {cartError && <p className="error" role="alert">{cartError}</p>}
+              {feedback && <p className="success" role="status">{feedback} <Link to="/cart">View cart</Link></p>}
+              <button onClick={addToCart} disabled={adding || !Number.isInteger(Number(quantity)) || Number(quantity)<1 || Number(quantity)>selectedVariant.inStock || selectedVariant.inStock <= 0} style={{ padding: '12px 24px', background: '#0056b3', color: 'white', border: 'none', borderRadius: '4px', cursor: selectedVariant.inStock > 0 ? 'pointer' : 'not-allowed', marginTop: '16px' }}>
+                {adding ? "Adding…" : "Add to Cart"}
+              </button>
             </div>
           )}
         </div>
@@ -167,4 +100,3 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
-

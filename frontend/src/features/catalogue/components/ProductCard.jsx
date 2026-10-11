@@ -1,10 +1,14 @@
 // frontend/src/features/catalogue/components/ProductCard.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import ProductImage from './ProductImage';
 
 const ProductCard = ({ product }) => {
   return (
     <div className="product-card" style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', margin: '8px' }}>
+      <Link to={`/products/${product.productId}`} className="product-image-link" aria-label={`View ${product.productName}`}>
+        <ProductImage productName={product.productName} images={product.images}/>
+      </Link>
       <h3>{product.productName}</h3>
       <p>Brand: {product.brand}</p>
       <div className="categories">
