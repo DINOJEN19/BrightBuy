@@ -23,6 +23,6 @@ export function AuthProvider({children}) {
     return data.data.customer;
   }
   function logout() {sessionStorage.removeItem('brightbuy.token'); setUser(null); setError('');}
-  return <AuthContext.Provider value={{user,loading,error,login,logout,setUser}}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{user,loading,isLoading:loading,isAuthenticated:!!user,error,login,logout,setUser}}>{children}</AuthContext.Provider>;
 }
 export const useAuth = () => useContext(AuthContext);
