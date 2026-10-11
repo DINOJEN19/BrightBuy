@@ -2,6 +2,8 @@
 -- Task 4: ACID Transactions (04_procedures.sql)
 -- Group 15
 
+USE brightbuy;
+
 DELIMITER $$
 
 DROP PROCEDURE IF EXISTS sp_PlaceOrder$$
@@ -18,6 +20,7 @@ CREATE PROCEDURE sp_PlaceOrder(
 )
 PROC_BODY: BEGIN
     -- Variables for validation and calculations
+    DECLARE v_customer_lock INT;
     DECLARE v_cart_customer_id INT;
     DECLARE v_cart_status VARCHAR(20);
     DECLARE v_item_count INT DEFAULT 0;
@@ -33,7 +36,16 @@ PROC_BODY: BEGIN
         RESIGNAL;
     END;
 
+    -- Each read sees the latest committed values after the explicit row locks.
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
     START TRANSACTION;
+    SET p_order_id = NULL;
+    SET p_estimated_delivery_date = NULL;
+    SELECT customer_id INTO v_customer_lock FROM CUSTOMER
+    WHERE customer_id = p_customer_id FOR UPDATE;
+    IF p_delivery_mode IS NULL OR p_payment_method IS NULL OR p_destination_city IS NULL OR TRIM(p_destination_city) = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Order rejected: delivery and payment details are required.';
+    END IF;
     -- =========================================================================
     -- PRECONDITIONS CHECK (Executed before touching or modifying data)
     -- =========================================================================
@@ -42,7 +54,7 @@ PROC_BODY: BEGIN
     SELECT customer_id, cart_status 
     INTO v_cart_customer_id, v_cart_status
     FROM CART 
-    WHERE cart_id = p_cart_id;
+    WHERE cart_id = p_cart_id FOR UPDATE;
 
     IF v_cart_customer_id IS NULL OR v_cart_customer_id <> p_customer_id OR v_cart_status <> 'ACTIVE' THEN
         SIGNAL SQLSTATE '45000'
@@ -75,6 +87,7 @@ PROC_BODY: BEGIN
     FROM VARIANT v
     JOIN CART_ITEM ci ON v.variant_id = ci.variant_id
     WHERE ci.cart_id = p_cart_id
+    ORDER BY v.variant_id
     FOR UPDATE;
 
     -- Step 3 & 4: Check if available stock meets requested quantity across all items
@@ -82,7 +95,9 @@ PROC_BODY: BEGIN
     INTO v_insufficient_stock
     FROM CART_ITEM ci
     JOIN VARIANT v ON ci.variant_id = v.variant_id
-    WHERE ci.cart_id = p_cart_id AND ci.quantity > v.stock_quantity;
+    JOIN PRODUCT p ON p.product_id = v.product_id
+    WHERE ci.cart_id = p_cart_id
+      AND (ci.quantity > v.stock_quantity OR v.status <> 'ACTIVE' OR p.status <> 'ACTIVE');
 
     IF v_insufficient_stock > 0 THEN
         ROLLBACK;
