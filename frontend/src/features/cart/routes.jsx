@@ -2,11 +2,12 @@
 // Exports Person 3's route fragment.
 // Owned by Person 3.
 
+import React from 'react';
 import { Route } from 'react-router-dom';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
-import RequireAuth from '../../components/RequireAuth';
+import RequireRole from '../../components/RequireRole';
 
 export const cartRoutes = [
   <Route key="cart" path="/cart" element={<CartPage />} />,
@@ -14,18 +15,18 @@ export const cartRoutes = [
     key="checkout"
     path="/checkout"
     element={
-      <RequireAuth>
+      <RequireRole>
         <CheckoutPage />
-      </RequireAuth>
+      </RequireRole>
     }
   />,
   <Route
     key="order-confirmation"
     path="/order-confirmation"
     element={
-      <RequireAuth>
+      <RequireRole>
         <OrderConfirmationPage />
-      </RequireAuth>
+      </RequireRole>
     }
   />,
 ];

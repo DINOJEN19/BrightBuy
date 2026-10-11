@@ -16,8 +16,8 @@ exports.getProducts = async (req, res, next) => {
   try {
     const category = req.query.category;
     const q = req.query.q;
-    const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-    let pageSize = req.query.pageSize ? parseInt(req.query.pageSize, 10) : 20;
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    let pageSize = Math.max(1, parseInt(req.query.pageSize, 10) || 20);
     
     if (pageSize > 100) pageSize = 100; // max pageSize = 100 as per docs
 

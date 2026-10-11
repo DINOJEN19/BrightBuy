@@ -78,169 +78,73 @@ async function getCart(customerId) {
   }
 }
 
-/**
- * Adds a variant and quantity to the customer's active cart.
- * Creates the cart row on first use.
- * @param {number} customerId
- * @param {{ variantId: number, quantity: number }} param1
- * @returns {Promise<{ cartItemId: number }>}
- */
-async function addItem(customerId, { variantId, quantity }) {
-  const parsedQty = Number(quantity);
-  if (!Number.isInteger(parsedQty) || parsedQty <= 0) {
-    const err = new Error('Quantity must be a positive integer.');
-    err.code = 'INVALID_QUANTITY';
-    throw err;
-  }
 
+function failure(code, message) { const error = new Error(message); error.code = code; return error; }
+function validQuantity(value) {
+  if (!Number.isInteger(Number(value)) || Number(value) < 1 || Number(value) > 2147483647)
+    throw failure('INVALID_QUANTITY', 'Quantity must be a positive integer.');
+  return Number(value);
+}
+// All cart mutations and sp_PlaceOrder acquire the same customer lock first.
+// This serializes requests from multiple tabs before any cart rows are read.
+async function mutate(customerId, operation) {
   const conn = await pool.getConnection();
   try {
-    // 1. Verify variant exists and is active
-    const [varRows] = await conn.query(
-      `SELECT variant_id, price FROM VARIANT WHERE variant_id = ? AND status = 'ACTIVE'`,
-      [variantId]
-    );
-
-    if (varRows.length === 0) {
-      const err = new Error('Variant not found.');
-      err.code = 'NOT_FOUND';
-      throw err;
-    }
-
-    // 2. Find or create active cart
-    const [cartRows] = await conn.query(
-      `SELECT cart_id FROM CART WHERE customer_id = ? AND cart_status = 'ACTIVE' LIMIT 1`,
-      [customerId]
-    );
-
-    let cartId;
-    if (cartRows.length === 0) {
-      const [insertCartResult] = await conn.query(
-        `INSERT INTO CART (customer_id, cart_status) VALUES (?, 'ACTIVE')`,
-        [customerId]
-      );
-      cartId = insertCartResult.insertId;
-    } else {
-      cartId = cartRows[0].cart_id;
-    }
-
-    // 3. Check if variant already exists in this cart
-    const [itemRows] = await conn.query(
-      `SELECT cart_item_id, quantity FROM CART_ITEM WHERE cart_id = ? AND variant_id = ?`,
-      [cartId, variantId]
-    );
-
-    let cartItemId;
-    if (itemRows.length > 0) {
-      cartItemId = itemRows[0].cart_item_id;
-      const newQuantity = itemRows[0].quantity + parsedQty;
-      await conn.query(
-        `UPDATE CART_ITEM SET quantity = ? WHERE cart_item_id = ?`,
-        [newQuantity, cartItemId]
-      );
-    } else {
-      const [insertItemResult] = await conn.query(
-        `INSERT INTO CART_ITEM (cart_id, variant_id, quantity) VALUES (?, ?, ?)`,
-        [cartId, variantId, parsedQty]
-      );
-      cartItemId = insertItemResult.insertId;
-    }
-
-    // Touch cart updated_at
-    await conn.query(`UPDATE CART SET updated_at = NOW() WHERE cart_id = ?`, [cartId]);
-
-    return { cartItemId };
-  } finally {
-    conn.release();
-  }
+    await conn.beginTransaction();
+    await conn.query('SELECT customer_id FROM CUSTOMER WHERE customer_id = ? FOR UPDATE', [customerId]);
+    const result = await operation(conn);
+    await conn.commit();
+    return result;
+  } catch (error) { await conn.rollback(); throw error; }
+  finally {conn.release();}
 }
-
-/**
- * Updates the quantity of an existing cart line item.
- * @param {number} customerId
- * @param {number} cartItemId
- * @param {{ quantity: number }} param2
- * @returns {Promise<{ cartItemId: number, quantity: number }>}
- */
-async function updateItem(customerId, cartItemId, { quantity }) {
-  const parsedQty = Number(quantity);
-  if (!Number.isInteger(parsedQty) || parsedQty <= 0) {
-    const err = new Error('Quantity must be a positive integer.');
-    err.code = 'INVALID_QUANTITY';
-    throw err;
-  }
-
-  const conn = await pool.getConnection();
-  try {
-    // Verify item belongs to customer's active cart
-    const [rows] = await conn.query(
-      `SELECT ci.cart_item_id, ci.cart_id
-       FROM CART_ITEM ci
-       JOIN CART c ON ci.cart_id = c.cart_id
-       WHERE ci.cart_item_id = ? AND c.customer_id = ? AND c.cart_status = 'ACTIVE'`,
-      [cartItemId, customerId]
-    );
-
-    if (rows.length === 0) {
-      const err = new Error('Cart item not found.');
-      err.code = 'NOT_FOUND';
-      throw err;
+async function addItem(customerId, {variantId, quantity}) {
+  const qty = validQuantity(quantity);
+  return mutate(customerId, async conn => {
+    const [variants] = await conn.query(`SELECT v.variant_id, v.stock_quantity FROM VARIANT v
+      JOIN PRODUCT p ON p.product_id=v.product_id
+      WHERE v.variant_id=? AND v.status='ACTIVE' AND p.status='ACTIVE'`, [variantId]);
+    if (!variants.length) throw failure('NOT_FOUND','Variant not found.');
+    const [carts] = await conn.query("SELECT cart_id FROM CART WHERE customer_id=? AND cart_status='ACTIVE' ORDER BY cart_id DESC LIMIT 1 FOR UPDATE", [customerId]);
+    let cartId = carts[0]?.cart_id;
+    if (!cartId) {
+      const [cart] = await conn.query("INSERT INTO CART (customer_id,cart_status) VALUES (?,'ACTIVE')", [customerId]);
+      cartId=cart.insertId;
     }
-
-    await conn.query(
-      `UPDATE CART_ITEM SET quantity = ? WHERE cart_item_id = ?`,
-      [parsedQty, cartItemId]
-    );
-
-    // Touch cart updated_at
-    await conn.query(`UPDATE CART SET updated_at = NOW() WHERE cart_id = ?`, [rows[0].cart_id]);
-
-    return {
-      cartItemId: parseInt(cartItemId, 10),
-      quantity: parsedQty,
-    };
-  } finally {
-    conn.release();
-  }
+    const [items] = await conn.query('SELECT cart_item_id, quantity FROM CART_ITEM WHERE cart_id=? AND variant_id=? FOR UPDATE', [cartId,variantId]);
+    const newQuantity = qty + Number(items[0]?.quantity || 0);
+    if(newQuantity > variants[0].stock_quantity) throw failure('VALIDATION_ERROR','Requested quantity exceeds available stock.');
+    let cartItemId=items[0]?.cart_item_id;
+    if(cartItemId) await conn.query('UPDATE CART_ITEM SET quantity=? WHERE cart_item_id=?',[newQuantity,cartItemId]);
+    else {const [item]=await conn.query('INSERT INTO CART_ITEM (cart_id,variant_id,quantity) VALUES (?,?,?)',[cartId,variantId,newQuantity]); cartItemId=item.insertId;}
+    await conn.query('UPDATE CART SET updated_at=NOW() WHERE cart_id=?',[cartId]);
+    return {cartItemId};
+  });
 }
-
-/**
- * Removes a line item from the customer's active cart.
- * @param {number} customerId
- * @param {number} cartItemId
- * @returns {Promise<boolean>}
- */
+async function findOwnedItem(conn, customerId, cartItemId) {
+  const [rows]=await conn.query(`SELECT ci.cart_item_id, ci.cart_id, ci.variant_id FROM CART_ITEM ci
+    JOIN CART c ON c.cart_id=ci.cart_id
+    WHERE ci.cart_item_id=? AND c.customer_id=? AND c.cart_status='ACTIVE' FOR UPDATE`,[cartItemId,customerId]);
+  if(!rows.length) throw failure('NOT_FOUND','Cart item not found.');
+  return rows[0];
+}
+async function updateItem(customerId, cartItemId, {quantity}) {
+  const qty=validQuantity(quantity);
+  return mutate(customerId,async conn=>{
+    const item=await findOwnedItem(conn,customerId,cartItemId);
+    const [variants]=await conn.query("SELECT stock_quantity FROM VARIANT WHERE variant_id=? AND status='ACTIVE'",[item.variant_id]);
+    if(!variants.length || qty>variants[0].stock_quantity) throw failure('VALIDATION_ERROR','Requested quantity exceeds available stock.');
+    await conn.query('UPDATE CART_ITEM SET quantity=? WHERE cart_item_id=?',[qty,cartItemId]);
+    await conn.query('UPDATE CART SET updated_at=NOW() WHERE cart_id=?',[item.cart_id]);
+    return {cartItemId:Number(cartItemId),quantity:qty};
+  });
+}
 async function removeItem(customerId, cartItemId) {
-  const conn = await pool.getConnection();
-  try {
-    const [rows] = await conn.query(
-      `SELECT ci.cart_item_id, ci.cart_id
-       FROM CART_ITEM ci
-       JOIN CART c ON ci.cart_id = c.cart_id
-       WHERE ci.cart_item_id = ? AND c.customer_id = ? AND c.cart_status = 'ACTIVE'`,
-      [cartItemId, customerId]
-    );
-
-    if (rows.length === 0) {
-      const err = new Error('Cart item not found.');
-      err.code = 'NOT_FOUND';
-      throw err;
-    }
-
-    await conn.query(`DELETE FROM CART_ITEM WHERE cart_item_id = ?`, [cartItemId]);
-
-    // Touch cart updated_at
-    await conn.query(`UPDATE CART SET updated_at = NOW() WHERE cart_id = ?`, [rows[0].cart_id]);
-
+  return mutate(customerId,async conn=>{
+    const item=await findOwnedItem(conn,customerId,cartItemId);
+    await conn.query('DELETE FROM CART_ITEM WHERE cart_item_id=?',[cartItemId]);
+    await conn.query('UPDATE CART SET updated_at=NOW() WHERE cart_id=?',[item.cart_id]);
     return true;
-  } finally {
-    conn.release();
-  }
+  });
 }
-
-module.exports = {
-  getCart,
-  addItem,
-  updateItem,
-  removeItem,
-};
+module.exports = {getCart,addItem,updateItem,removeItem};

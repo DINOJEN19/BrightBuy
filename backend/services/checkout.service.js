@@ -81,6 +81,10 @@ async function placeOrder(customerId, {
     throw err;
   }
 
+  if (destinationCity.trim().length > 80 || (deliveryAddress != null && (typeof deliveryAddress !== 'string' || deliveryAddress.length > 255)) || (requestedCartId != null && (!Number.isInteger(requestedCartId) || requestedCartId < 1))) {
+    const err = new Error('Invalid city, address, or cart ID.'); err.code='VALIDATION_ERROR'; throw err;
+  }
+
   // 2. Format validation for card payments before invoking the stored procedure
   if (paymentMethod === 'CARD_PAYMENT') {
     if (!isValidCardDetails(cardDetails)) {

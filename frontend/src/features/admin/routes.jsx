@@ -1,6 +1,5 @@
 // frontend/src/features/admin/routes.jsx
-// Exports Person 5's route fragment.
-// Owned by Person 5.
+// Exports Person 5's & Person 4's route fragments.
 
 import React from 'react';
 import { Route } from 'react-router-dom';
@@ -8,6 +7,7 @@ import RequireRole from '../../components/RequireRole';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import CategoryFormPage from './pages/admin/CategoryFormPage';
+import ProductManagerPage from './pages/admin/ProductManagerPage';
 import QuarterlySalesReportPage from './pages/reports/QuarterlySalesReportPage';
 import TopSellingProductsReportPage from './pages/reports/TopSellingProductsReportPage';
 import CategoryOrderCountsReportPage from './pages/reports/CategoryOrderCountsReportPage';
@@ -21,6 +21,15 @@ export const adminRoutes = [
     element={
       <RequireRole roles={['ADMIN']}>
         <AdminDashboardPage />
+      </RequireRole>
+    }
+  />,
+  <Route
+    key="admin-products-manage"
+    path="/admin/products"
+    element={
+      <RequireRole roles={['ADMIN']}>
+        <ProductManagerPage />
       </RequireRole>
     }
   />,

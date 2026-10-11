@@ -2,6 +2,7 @@
 'use strict';
 
 const pool = require('../config/db');
+const {listImages}=require('./productImages.service');
 
 async function getCategories() {
   const conn = await pool.getConnection();
@@ -57,6 +58,7 @@ async function getProducts({ category, q, page = 1, pageSize = 20 }) {
         [product.product_id]
       );
       product.categories = catRows;
+      product.images = await listImages(conn,product.product_id);
     }
 
     return {
@@ -64,7 +66,8 @@ async function getProducts({ category, q, page = 1, pageSize = 20 }) {
         productId: p.product_id,
         productName: p.product_name,
         brand: p.brand,
-        categories: p.categories
+        categories: p.categories,
+        images: p.images
       })),
       meta: { page: parseInt(page, 10), pageSize: parseInt(pageSize, 10), total }
     };
@@ -94,6 +97,7 @@ async function getProduct(productId) {
       [productId]
     );
 
+    product.images = await listImages(conn,productId);
     product.variants = varRows.map(v => ({
       ...v,
       price: parseFloat(v.price)

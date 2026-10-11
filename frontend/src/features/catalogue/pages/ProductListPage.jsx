@@ -8,6 +8,7 @@ import CategoryFilter from '../components/CategoryFilter';
 
 const ProductListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [error,setError] = useState('');
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,13 +24,13 @@ const ProductListPage = () => {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      setLoading(true);
+      setLoading(true); setError('');
       try {
         const response = await getProducts({ q: query, category: categoryId, page });
         setProducts(response.data.data);
         setMeta(response.data.meta);
       } catch (error) {
-        console.error('Failed to fetch products', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -64,7 +65,8 @@ const ProductListPage = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <h2>Products</h2>
+      <p className="eyebrow">THE BRIGHTBUY COLLECTION</p><h1>Find your everyday favourites.</h1><p>Explore electronics, essentials, and more. Pick a product to see prices and available variants.</p>
+      {error && <p role="alert" className="error">{error}</p>}
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
         <SearchBar initialQuery={query} onSearch={handleSearch} />
         <CategoryFilter categories={categories} selectedCategory={categoryId} onSelectCategory={handleCategorySelect} />

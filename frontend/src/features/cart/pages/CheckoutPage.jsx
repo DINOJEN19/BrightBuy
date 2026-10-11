@@ -7,11 +7,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getCart, checkout } from '../api';
 import DeliveryModeSelector from '../components/DeliveryModeSelector';
 import PaymentMethodSelector from '../components/PaymentMethodSelector';
+import { useAuth } from '../../../context/AuthContext';
 
 const MAIN_CITIES = ['Houston', 'Dallas', 'Austin', 'San Antonio', 'Fort Worth'];
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [cart, setCart] = useState(null);
   const [loadingCart, setLoadingCart] = useState(true);
@@ -31,6 +33,31 @@ const CheckoutPage = () => {
     expiryDate: '',
     cvv: '',
   });
+
+  // Pre-fill from logged-in customer's profile
+  useEffect(() => {
+    if (user) {
+      if (user.address && !deliveryAddress) {
+        setDeliveryAddress(user.address);
+      }
+      if (user.fullName && !cardDetails.cardholderName) {
+        setCardDetails((prev) => ({ ...prev, cardholderName: user.fullName }));
+      }
+      if (user.city) {
+        const matchedMainCity = MAIN_CITIES.find(
+          (c) => c.toLowerCase() === user.city.trim().toLowerCase()
+        );
+        if (matchedMainCity) {
+          setDestinationCity(matchedMainCity);
+          setIsOtherCity(false);
+        } else {
+          setIsOtherCity(true);
+          setCustomCity(user.city.trim());
+          setDestinationCity(user.city.trim());
+        }
+      }
+    }
+  }, [user]);
 
   // Errors and feedback states
   const [businessRuleError, setBusinessRuleError] = useState(null);

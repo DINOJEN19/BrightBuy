@@ -2,14 +2,15 @@
 // Displays active cart line items, quantity edit, item removal, and subtotal.
 // Owned by Person 3.
 
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { getCart, updateItem, removeItem } from '../api';
 import { useAuth } from '../../../context/AuthContext';
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated: authIsAuth, loading: authLoading } = useAuth();
+  const isAuthenticated = Boolean(user || authIsAuth);
   const [cart, setCart] = useState({ cartId: null, items: [], total: 0 });
   const [error, setError] = useState(null);
   const [busyItemIds, setBusyItemIds] = useState([]);

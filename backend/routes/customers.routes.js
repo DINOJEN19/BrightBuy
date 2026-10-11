@@ -14,7 +14,7 @@ const updateProfileSchema = Joi.object({
   fullName: Joi.string().min(2).max(100).optional(),
   phone: Joi.string().max(20).optional().allow('', null),
   address: Joi.string().max(255).optional().allow('', null),
-  city: Joi.string().max(100).optional().allow('', null),
+  city: Joi.string().max(80).optional().allow('', null),
 }).min(1); // at least one field must be provided
 
 // --- Routes ----------------------------------------------------------------

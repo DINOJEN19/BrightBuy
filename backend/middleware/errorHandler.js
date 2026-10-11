@@ -28,10 +28,16 @@ function errorHandler(err, req, res, next) {
     return res.status(409).json({
       error: {
         code: 'DUPLICATE_ENTRY',
-        message: err.sqlMessage || 'A duplicate entry was detected.',
+        message: 'A record with these unique details already exists.',
       },
     });
   }
+
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({error:{code:'INVALID_JSON',message:'The request body must be valid JSON.'}});
+  }
+  const status = err.status || {VALIDATION_ERROR:400, INVALID_QUANTITY:400, NOT_FOUND:404, FORBIDDEN:403}[err.code];
+  if (status >= 400 && status < 500) return res.status(status).json({error:{code:err.code || 'REQUEST_ERROR',message:err.message}});
 
   // Unhandled / unexpected errors
   console.error('[ErrorHandler]', err);

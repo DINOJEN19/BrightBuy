@@ -1,15 +1,8 @@
--- =====================================================================
--- BrightBuy MIMS Database - Task 2: Data Population (02_seeds.sql)
--- Run AFTER 01_schema.sql has been applied.
--- Steps 1-5 below are direct INSERTs. Step 6 (sample orders) is deferred
--- until sp_PlaceOrder (Task 4) exists -- see the note at the bottom.
--- =====================================================================
+
 
 START TRANSACTION;
 
--- -----------------------------------------------------------------
--- Step 1: CATEGORY (>= 10 rows, unique names)
--- -----------------------------------------------------------------
+
 INSERT INTO CATEGORY (category_name, description) VALUES
   ('Mobiles', 'Smartphones and feature phones'),
   ('Laptops', 'Notebook and ultrabook computers'),
@@ -22,9 +15,7 @@ INSERT INTO CATEGORY (category_name, description) VALUES
   ('Toys', 'Consumer toys for children'),
   ('Educational Toys', 'STEM and learning-focused toys');
 
--- -----------------------------------------------------------------
--- Step 2: PRODUCT (>= 40 rows, every category has >= 1 product)
--- -----------------------------------------------------------------
+
 INSERT INTO PRODUCT (product_name, description, brand, status) VALUES
   ('TechNova Pulse 12', 'Flagship smartphone with a 6.5-inch OLED display.', 'TechNova', 'ACTIVE'),
   ('TechNova Pulse 12 Mini', 'Compact version of the Pulse 12 with the same core specs.', 'TechNova', 'ACTIVE'),
@@ -67,11 +58,7 @@ INSERT INTO PRODUCT (product_name, description, brand, status) VALUES
   ('SmartKid Tablet Jr', 'Kid-safe learning tablet with preloaded apps.', 'SmartKid', 'ACTIVE'),
   ('SmartKid Globe Explorer', 'Interactive talking globe for geography learning.', 'SmartKid', 'ACTIVE');
 
--- -----------------------------------------------------------------
--- Step 3: PRODUCT_CATEGORY (link every product to its category)
--- Uses name-based lookups so this script never depends on assumed
--- auto-increment ID values.
--- -----------------------------------------------------------------
+
 INSERT INTO PRODUCT_CATEGORY (product_id, category_id)
 SELECT p.product_id, c.category_id FROM PRODUCT p, CATEGORY c WHERE p.product_name = 'TechNova Pulse 12' AND c.category_name = 'Mobiles'
 UNION ALL
@@ -153,9 +140,7 @@ SELECT p.product_id, c.category_id FROM PRODUCT p, CATEGORY c WHERE p.product_na
 UNION ALL
 SELECT p.product_id, c.category_id FROM PRODUCT p, CATEGORY c WHERE p.product_name = 'SmartKid Globe Explorer' AND c.category_name = 'Educational Toys';
 
--- -----------------------------------------------------------------
--- Step 4: VARIANT (>= 1 per product, unique SKU, price > 0, stock >= 0)
--- -----------------------------------------------------------------
+
 INSERT INTO VARIANT (product_id, sku, variant_name, colour, memory_size, price, stock_quantity, status)
 SELECT p.product_id, 'BB-0001', 'TechNova Pulse 12 Black 128GB', 'Black', '128GB', 899.00, 15, 'ACTIVE' FROM PRODUCT p WHERE p.product_name = 'TechNova Pulse 12'
 UNION ALL
@@ -345,80 +330,34 @@ SELECT p.product_id, 'BB-0093', 'SmartKid Tablet Jr Default', NULL, NULL, 89.00,
 UNION ALL
 SELECT p.product_id, 'BB-0094', 'SmartKid Globe Explorer Default', NULL, NULL, 34.00, 25, 'ACTIVE' FROM PRODUCT p WHERE p.product_name = 'SmartKid Globe Explorer';
 
--- -----------------------------------------------------------------
--- Step 5: CUSTOMER (sample accounts for testing checkout/order-history)
--- NOTE: password_hash values below are PLACEHOLDERS, not real bcrypt
--- hashes (this sandbox has no network access to install bcrypt).
--- Before using these for login testing, generate real hashes with:
---   node -e "require('bcrypt').hash('Password123!',10).then(console.log)"
--- (bcrypt is already a dependency in package.json) and replace the
--- values below.
--- -----------------------------------------------------------------
-INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city, role) VALUES
-  ('James Miller', 'james.miller@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550101', '1204 Congress Ave', 'Austin', 'CUSTOMER'),
-  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '7135550102', '4502 Main St', 'Houston', 'CUSTOMER'),
-  ('Michael Johnson', 'michael.j@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '2145550103', '808 Elm St', 'Dallas', 'CUSTOMER'),
-  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '9155550104', '2100 Mesa St', 'El Paso', 'CUSTOMER'),
-  ('David Martinez', 'david.martinez@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '8065550105', '303 Broadway St', 'Lubbock', 'CUSTOMER'),
-  ('Admin User', 'admin@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550199', '100 Admin Way', 'Austin', 'ADMIN'),
-  ('Warehouse Staff', 'staff@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550198', '200 Logistics Blvd', 'Dallas', 'WAREHOUSE_STAFF');
+
+INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city) VALUES
+  ('James Miller', 'james.miller@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '5125550101', '1204 Congress Ave', 'Austin'),
+  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '7135550102', '4502 Main St', 'Houston'),
+  ('Michael Johnson', 'michael.j@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '2145550103', '808 Elm St', 'Dallas'),
+  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '9155550104', '2100 Mesa St', 'El Paso'),
+  ('David Martinez', 'david.martinez@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '8065550105', '303 Broadway St', 'Lubbock');
 
 COMMIT;
 
--- =====================================================================
--- Step 6 (DEFERRED): sample CUSTOMER_ORDER / ORDER_ITEM / PAYMENT /
--- DELIVERY rows.
---
--- Per the build guide, these MUST be created only via sp_PlaceOrder
--- (Task 4), never by direct INSERT -- so they cannot be seeded until
--- that procedure exists. Once Task 4 is merged, run something like:
---
---   CALL sp_PlaceOrder(
---     <customer_id>, <cart_id>, 'STANDARD_DELIVERY',
---     '12 Galle Road, Colombo', 'Colombo', 'CASH_ON_DELIVERY'
---   );
---
--- which requires first creating a CART and CART_ITEM row(s) for that
--- customer (a normal, direct INSERT is fine for CART/CART_ITEM --
--- only CUSTOMER_ORDER and its children are restricted to sp_PlaceOrder).
--- =====================================================================
 
--- =====================================================================
--- OPTIONAL: main-cities reference list (Houston, Dallas, Austin,
--- San Antonio, Fort Worth) used by fn_calculate_delivery_estimate (Task 3).
---
--- Task 1's table list (CATEGORY, PRODUCT, PRODUCT_CATEGORY, VARIANT,
--- CUSTOMER, CART, CART_ITEM, CUSTOMER_ORDER, ORDER_ITEM, PAYMENT,
--- DELIVERY, STOCK_ADJUSTMENT) does NOT include a main-city lookup table.
--- CHECK WITH WHOEVER BUILT TASK 1 before running this block:
---   - If they added a MAIN_CITY table as a schema extension, uncomment
---     and adjust the INSERT below to match their exact column names.
---   - If not, skip this entirely -- the 5-city list can just live as
---     inline literals inside fn_calculate_delivery_estimate (Task 3),
---     which is explicitly allowed as a fallback per the guide.
--- =====================================================================
 INSERT INTO MAIN_CITY (city_name) VALUES
   ('Houston'), ('Dallas'), ('Austin'), ('San Antonio'), ('Fort Worth');
 
--- =====================================================================
--- Step 7: Verification queries -- run these after the script completes
--- =====================================================================
-SELECT COUNT(*) AS category_count FROM CATEGORY;                 -- expect >= 10
-SELECT COUNT(*) AS product_count FROM PRODUCT;                   -- expect >= 40
 
--- Every product must have at least 1 VARIANT row:
+SELECT COUNT(*) AS category_count FROM CATEGORY;                 
+SELECT COUNT(*) AS product_count FROM PRODUCT;                   
+
 SELECT p.product_id, p.product_name
 FROM PRODUCT p
 LEFT JOIN VARIANT v ON v.product_id = p.product_id
 WHERE v.variant_id IS NULL;                                      -- expect 0 rows
 
--- Every product must have at least 1 PRODUCT_CATEGORY row:
 SELECT p.product_id, p.product_name
 FROM PRODUCT p
 LEFT JOIN PRODUCT_CATEGORY pc ON pc.product_id = p.product_id
 WHERE pc.category_id IS NULL;                                    -- expect 0 rows
 
--- Every category must have at least 1 product:
 SELECT c.category_id, c.category_name
 FROM CATEGORY c
 LEFT JOIN PRODUCT_CATEGORY pc ON pc.category_id = c.category_id

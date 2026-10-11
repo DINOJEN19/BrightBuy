@@ -348,7 +348,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           if (sql.includes("FROM CART")) return [[]];
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       const cart = await cartService.getCart(999);
@@ -392,7 +393,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           }
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       const cart = await cartService.getCart(1);
@@ -410,6 +412,7 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
         if (sql.includes("FROM VARIANT")) return [[]];
         return [[]];
       },
+      beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
       release: () => {},
     });
 
@@ -433,7 +436,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           if (sql.includes("FROM CART_ITEM ci")) return [[]];
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       await assert.rejects(
@@ -457,7 +461,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           if (sql.includes("FROM CART_ITEM ci")) return [[]];
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       await assert.rejects(
@@ -497,7 +502,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           }
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       const result = await checkoutService.placeOrder(1, {
@@ -533,7 +539,8 @@ test("5. Cart and Checkout Service Logic (with Mocked DB Pool)", async (t) => {
           }
           return [[]];
         },
-        release: () => {},
+        beginTransaction: async () => {}, commit: async () => {}, rollback: async () => {},
+      release: () => {},
       });
 
       const token = getTestToken(1);
