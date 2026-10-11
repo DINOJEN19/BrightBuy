@@ -2,6 +2,7 @@
 // Exports Person 3's route fragment.
 // Owned by Person 3.
 
+import React from 'react';
 import { Route } from 'react-router-dom';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
