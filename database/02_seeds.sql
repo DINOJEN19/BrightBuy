@@ -347,21 +347,14 @@ SELECT p.product_id, 'BB-0094', 'SmartKid Globe Explorer Default', NULL, NULL, 3
 
 -- -----------------------------------------------------------------
 -- Step 5: CUSTOMER (sample accounts for testing checkout/order-history)
--- NOTE: password_hash values below are PLACEHOLDERS, not real bcrypt
--- hashes (this sandbox has no network access to install bcrypt).
--- Before using these for login testing, generate real hashes with:
---   node -e "require('bcrypt').hash('Password123!',10).then(console.log)"
--- (bcrypt is already a dependency in package.json) and replace the
--- values below.
+-- Local demo password for these accounts: BrightBuy123!
 -- -----------------------------------------------------------------
-INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city, role) VALUES
-  ('James Miller', 'james.miller@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550101', '1204 Congress Ave', 'Austin', 'CUSTOMER'),
-  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '7135550102', '4502 Main St', 'Houston', 'CUSTOMER'),
-  ('Michael Johnson', 'michael.j@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '2145550103', '808 Elm St', 'Dallas', 'CUSTOMER'),
-  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '9155550104', '2100 Mesa St', 'El Paso', 'CUSTOMER'),
-  ('David Martinez', 'david.martinez@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '8065550105', '303 Broadway St', 'Lubbock', 'CUSTOMER'),
-  ('Admin User', 'admin@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550199', '100 Admin Way', 'Austin', 'ADMIN'),
-  ('Warehouse Staff', 'staff@example.com', '$2b$10$3BEMbiPbIviL3/ODs6hR0.utITzZYXii/SazNchDDEGN2821nzG82', '5125550198', '200 Logistics Blvd', 'Dallas', 'WAREHOUSE_STAFF');
+INSERT INTO CUSTOMER (full_name, email, password_hash, phone, address, city) VALUES
+  ('James Miller', 'james.miller@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '5125550101', '1204 Congress Ave', 'Austin'),
+  ('Sarah Davis', 'sarah.davis@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '7135550102', '4502 Main St', 'Houston'),
+  ('Michael Johnson', 'michael.j@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '2145550103', '808 Elm St', 'Dallas'),
+  ('Emily Wilson', 'emily.wilson@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '9155550104', '2100 Mesa St', 'El Paso'),
+  ('David Martinez', 'david.martinez@example.com', '$2b$10$X4.ILp/qi7UYACDryNbb.OjegYpPQQqr8eHpOAf8.sL4e2tunir92', '8065550105', '303 Broadway St', 'Lubbock');
 
 COMMIT;
 
