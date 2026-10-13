@@ -71,12 +71,9 @@ const DeliveryEstimatesReportPage = () => {
         <Link to="/admin" style={{ fontSize: '13px', color: '#2563eb', textDecoration: 'none', fontWeight: '600' }}>
           ← Back to Admin Dashboard
         </Link>
-        <h1 style={{ margin: '8px 0 4px 0', fontSize: '26px', fontWeight: '800', color: '#0f172a' }}>
+        <h1 style={{ margin: '8px 0 0 0', fontSize: '26px', fontWeight: '800', color: '#0f172a' }}>
           Delivery Time Estimates
         </h1>
-        <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
-          Estimated delivery dates for upcoming and undelivered customer orders (REQ-9.4).
-        </p>
       </div>
 
       {error && (

@@ -21,7 +21,6 @@ const cardStyle = {
 const reports = [
   {
     title: 'Quarterly Sales Report',
-    desc: 'Review sales volume and gross revenue broken down by quarterly period (REQ-9.1).',
     path: '/admin/reports/quarterly-sales',
     badge: 'Sales & Revenue',
     badgeColor: '#dbeafe',
@@ -29,7 +28,6 @@ const reports = [
   },
   {
     title: 'Top-Selling Products',
-    desc: 'Identify top performers in units sold and revenue within customized date ranges (REQ-9.2).',
     path: '/admin/reports/top-selling-products',
     badge: 'Leaderboard',
     badgeColor: '#dcfce7',
@@ -37,7 +35,6 @@ const reports = [
   },
   {
     title: 'Category-wise Order Counts',
-    desc: 'Analyze order distribution and demand across product categories (REQ-9.3).',
     path: '/admin/reports/category-order-counts',
     badge: 'Distribution',
     badgeColor: '#f3e8ff',
@@ -45,7 +42,6 @@ const reports = [
   },
   {
     title: 'Delivery Time Estimates',
-    desc: 'Track upcoming order shipments, destinations, and logistics commitments (REQ-9.4).',
     path: '/admin/reports/delivery-estimates',
     badge: 'Logistics',
     badgeColor: '#fef3c7',
@@ -53,7 +49,6 @@ const reports = [
   },
   {
     title: 'Customer Order Summary',
-    desc: 'Audit customer account purchasing histories, orders, and payment statuses (REQ-9.5).',
     path: '/admin/reports/customer-summary',
     badge: 'Accounts',
     badgeColor: '#e0e7ff',
@@ -64,7 +59,6 @@ const reports = [
 const catalogueActions = [
   {
     title: 'Add New Product',
-    desc: 'Create catalogue items with multi-category mapping and initial product variants (REQ-1.4).',
     path: '/admin/products/new',
     badge: 'Catalogue Master',
     badgeColor: '#ccfbf1',
@@ -72,7 +66,6 @@ const catalogueActions = [
   },
   {
     title: 'Add New Category',
-    desc: 'Expand catalogue taxonomy with new product categories (REQ-1.1).',
     path: '/admin/categories/new',
     badge: 'Taxonomy',
     badgeColor: '#ffedd5',
@@ -130,12 +123,9 @@ const AdminDashboardPage = () => {
                     {action.badge}
                   </span>
                 </div>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
                   {action.title}
                 </h3>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
-                  {action.desc}
-                </p>
               </div>
               <div style={{ marginTop: '16px', fontSize: '13px', fontWeight: '700', color: '#2563eb' }}>
                 Open form →
@@ -151,7 +141,7 @@ const AdminDashboardPage = () => {
           <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>
             Mandated Management Reports
           </h2>
-          <span style={{ fontSize: '13px', color: '#64748b' }}>5 executive reporting views (REQ-9.1 - REQ-9.5)</span>
+          <span style={{ fontSize: '13px', color: '#64748b' }}>5 executive reporting views</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
@@ -176,12 +166,9 @@ const AdminDashboardPage = () => {
                     {report.badge}
                   </span>
                 </div>
-                <h3 style={{ margin: '0 0 6px 0', fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
+                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: '700', color: '#0f172a' }}>
                   {report.title}
                 </h3>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
-                  {report.desc}
-                </p>
               </div>
               <div style={{ marginTop: '16px', fontSize: '13px', fontWeight: '700', color: '#2563eb' }}>
                 View report →
