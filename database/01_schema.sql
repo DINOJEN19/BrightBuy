@@ -101,6 +101,7 @@ CREATE TABLE CUSTOMER_ORDER (
     order_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     order_status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
     total_amount DECIMAL(12, 2) NOT NULL,
+    delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     delivery_mode ENUM('STORE_PICKUP', 'STANDARD_DELIVERY') NOT NULL,
     delivery_address VARCHAR(255) NULL,
     destination_city VARCHAR(80) NOT NULL,
@@ -153,6 +154,7 @@ CREATE TABLE DELIVERY (
     delivery_status ENUM('PENDING', 'DISPATCHED', 'DELIVERED', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
     estimated_delivery_date DATE NOT NULL,
     actual_delivery_date DATE NULL,
+    delivery_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
     CONSTRAINT fk_delivery_order 
         FOREIGN KEY (order_id) REFERENCES CUSTOMER_ORDER(order_id) 
         ON DELETE CASCADE ON UPDATE CASCADE

@@ -99,6 +99,13 @@ const CheckoutPage = () => {
     setValidationError(null);
 
     const activeCity = isOtherCity ? customCity.trim() : destinationCity;
+    const isMainCity = MAIN_CITIES.some(
+      (c) => c.toLowerCase() === (activeCity || '').toLowerCase().trim()
+    );
+    const standardFee = isMainCity ? 4.99 : 8.99;
+    const deliveryFee = deliveryMode === 'STORE_PICKUP' ? 0 : standardFee;
+    const subtotal = cart?.total || 0;
+    const grandTotal = subtotal + deliveryFee;
 
     // Client-side quick checks
     if (!activeCity) {
@@ -134,7 +141,9 @@ const CheckoutPage = () => {
           destinationCity: activeCity,
           deliveryMode,
           paymentMethod,
-          total: cart?.total || 0,
+          subtotal,
+          deliveryFee,
+          total: confirmationData?.totalAmount ?? grandTotal,
         },
       });
     } catch (err) {
@@ -152,6 +161,15 @@ const CheckoutPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  const activeCity = isOtherCity ? customCity.trim() : destinationCity;
+  const isMainCity = MAIN_CITIES.some(
+    (c) => c.toLowerCase() === (activeCity || '').toLowerCase().trim()
+  );
+  const standardFee = isMainCity ? 4.99 : 8.99;
+  const deliveryFee = deliveryMode === 'STORE_PICKUP' ? 0 : standardFee;
+  const subtotal = cart?.total || 0;
+  const grandTotal = subtotal + deliveryFee;
 
   if (loadingCart) {
     return (
@@ -256,7 +274,7 @@ const CheckoutPage = () => {
                 1. Destination City
               </h3>
               <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '12px' }}>
-                Main cities (Houston, Dallas, Austin, San Antonio, Fort Worth) receive expedited 5-day delivery estimate.
+                Texas Main Cities (Houston, Dallas, Austin, San Antonio, Fort Worth) receive expedited 5-day delivery for a fixed $4.99 fee. All other locations are $8.99 (7-day delivery). Store Pickup is always free.
               </p>
 
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -275,10 +293,10 @@ const CheckoutPage = () => {
                 >
                   {MAIN_CITIES.map((city) => (
                     <option key={city} value={city}>
-                      {city} (Main City - 5 Days)
+                      {city} (Main City - $4.99 / 5 Days)
                     </option>
                   ))}
-                  <option value="OTHER">Other Texas / National City (7 Days)</option>
+                  <option value="OTHER">Other Texas / National City ($8.99 / 7 Days)</option>
                 </select>
 
                 {isOtherCity && (
@@ -310,6 +328,9 @@ const CheckoutPage = () => {
                 onSelectMode={setDeliveryMode}
                 deliveryAddress={deliveryAddress}
                 onAddressChange={setDeliveryAddress}
+                standardFee={standardFee}
+                isMainCity={isMainCity}
+                destinationCity={activeCity}
               />
             </div>
 
@@ -356,20 +377,29 @@ const CheckoutPage = () => {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#64748b' }}>
                 <span>Subtotal</span>
-                <span style={{ fontWeight: '500', color: '#0f172a' }}>${cart.total.toFixed(2)}</span>
+                <span style={{ fontWeight: '500', color: '#0f172a' }}>${subtotal.toFixed(2)}</span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#64748b' }}>
-                <span>Delivery</span>
-                <span style={{ fontWeight: '500', color: '#15803d' }}>
-                  {deliveryMode === 'STORE_PICKUP' ? 'Free (Pickup)' : 'Free (Standard)'}
+                <div>
+                  <span>Delivery Fee</span>
+                  <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                    {deliveryMode === 'STORE_PICKUP'
+                      ? 'Store Pickup (Free)'
+                      : isMainCity
+                      ? `Main City rate (${activeCity})`
+                      : `Standard Regional rate (${activeCity || 'Other'})`}
+                  </div>
+                </div>
+                <span style={{ fontWeight: '600', color: deliveryFee === 0 ? '#15803d' : '#0f172a' }}>
+                  {deliveryFee === 0 ? 'Free ($0.00)' : `$${deliveryFee.toFixed(2)}`}
                 </span>
               </div>
 
               <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '16px', marginTop: '16px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a' }}>Total Due</span>
                 <span style={{ fontSize: '22px', fontWeight: '800', color: '#2563eb' }}>
-                  ${cart.total.toFixed(2)}
+                  ${grandTotal.toFixed(2)}
                 </span>
               </div>
 

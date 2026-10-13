@@ -63,6 +63,7 @@ async function getOrders(customerId, { page, pageSize }) {
          o.order_status AS orderStatus,
          o.total_amount AS totalAmount,
          d.delivery_mode AS deliveryMode,
+         d.delivery_fee AS deliveryFee,
          p.payment_status AS paymentStatus
        FROM CUSTOMER_ORDER o
        LEFT JOIN PAYMENT p ON p.order_id = o.order_id
@@ -76,6 +77,7 @@ async function getOrders(customerId, { page, pageSize }) {
     const orders = rows.map((r) => ({
       ...r,
       totalAmount: parseFloat(r.totalAmount),
+      deliveryFee: parseFloat(r.deliveryFee || 0),
     }));
 
     return { orders, meta: { page, pageSize, total } };
@@ -121,11 +123,17 @@ async function getOrderById(customerId, orderId) {
          destination_city AS destinationCity,
          delivery_status AS deliveryStatus,
          estimated_delivery_date AS estimatedDeliveryDate,
-         actual_delivery_date AS actualDeliveryDate
+         actual_delivery_date AS actualDeliveryDate,
+         delivery_fee AS deliveryFee
        FROM DELIVERY
        WHERE order_id = ?`,
       [orderId]
     );
+
+    const delivery = deliveryRows[0] || null;
+    if (delivery) {
+      delivery.deliveryFee = parseFloat(delivery.deliveryFee || 0);
+    }
 
     const [paymentRows] = await conn.query(
       `SELECT
@@ -144,7 +152,7 @@ async function getOrderById(customerId, orderId) {
     return {
       orderId,
       items,
-      delivery: deliveryRows[0] || null,
+      delivery,
       payment,
     };
   } finally {
@@ -166,7 +174,8 @@ async function getDelivery(customerId, orderId) {
          destination_city AS destinationCity,
          delivery_status AS deliveryStatus,
          estimated_delivery_date AS estimatedDeliveryDate,
-         actual_delivery_date AS actualDeliveryDate
+         actual_delivery_date AS actualDeliveryDate,
+         delivery_fee AS deliveryFee
        FROM DELIVERY
        WHERE order_id = ?`,
       [orderId]
@@ -178,7 +187,10 @@ async function getDelivery(customerId, orderId) {
       throw err;
     }
 
-    return rows[0];
+    return {
+      ...rows[0],
+      deliveryFee: parseFloat(rows[0].deliveryFee || 0),
+    };
   } finally {
     conn.release();
   }

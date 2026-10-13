@@ -26,6 +26,7 @@ PROC_BODY: BEGIN
     DECLARE v_item_count INT DEFAULT 0;
     DECLARE v_insufficient_stock INT DEFAULT 0;
     DECLARE v_total_amount DECIMAL(12,2) DEFAULT 0.00;
+    DECLARE v_delivery_fee DECIMAL(10,2) DEFAULT 0.00;
     DECLARE v_all_items_in_stock BOOLEAN DEFAULT TRUE;
     DECLARE v_payment_status ENUM('PENDING', 'PAID', 'FAILED');
 
@@ -105,12 +106,16 @@ PROC_BODY: BEGIN
         SET MESSAGE_TEXT = 'Order rejected: one or more items no longer have sufficient stock.';
     END IF;
 
-    -- Step 5: Compute total amount snapshot
-    SELECT SUM(v.price * ci.quantity)
+    -- Step 5: Compute items total amount snapshot
+    SELECT COALESCE(SUM(v.price * ci.quantity), 0.00)
     INTO v_total_amount
     FROM CART_ITEM ci
     JOIN VARIANT v ON ci.variant_id = v.variant_id
     WHERE ci.cart_id = p_cart_id;
+
+    -- Step 5 (cont.): Calculate delivery fee and add to total amount
+    SET v_delivery_fee = fn_calculate_delivery_fee(p_destination_city, p_delivery_mode);
+    SET v_total_amount = v_total_amount + v_delivery_fee;
 
     -- Step 6 & 7: Calculate estimated delivery date using Task 3 function
     SET v_all_items_in_stock = TRUE;
@@ -122,6 +127,7 @@ PROC_BODY: BEGIN
         order_date,
         order_status,
         total_amount,
+        delivery_fee,
         delivery_mode,
         delivery_address,
         destination_city,
@@ -131,6 +137,7 @@ PROC_BODY: BEGIN
         NOW(),
         'CONFIRMED',
         v_total_amount,
+        v_delivery_fee,
         p_delivery_mode,
         p_delivery_address,
         p_destination_city,
@@ -197,13 +204,15 @@ PROC_BODY: BEGIN
         delivery_mode,
         destination_city,
         delivery_status,
-        estimated_delivery_date
+        estimated_delivery_date,
+        delivery_fee
     ) VALUES (
         p_order_id,
         p_delivery_mode,
         p_destination_city,
         'PENDING',
-        p_estimated_delivery_date
+        p_estimated_delivery_date,
+        v_delivery_fee
     );
 
     -- Step 14: Mark cart as CHECKED_OUT

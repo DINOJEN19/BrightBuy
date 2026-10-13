@@ -267,7 +267,8 @@ test(
                     )
                 ).body.data;
 
-                assert.equal(detail.payment.amount, 25);
+                assert.equal(detail.payment.amount, 29.99);
+                assert.equal(detail.delivery.deliveryFee, 4.99);
                 assert.equal(detail.payment.paymentStatus, 'PENDING');
 
                 assert.equal(

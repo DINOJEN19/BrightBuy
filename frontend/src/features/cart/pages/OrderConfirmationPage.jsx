@@ -16,6 +16,8 @@ const OrderConfirmationPage = () => {
     destinationCity,
     deliveryMode,
     paymentMethod,
+    subtotal,
+    deliveryFee,
     total,
   } = state;
 
@@ -129,6 +131,14 @@ const OrderConfirmationPage = () => {
                 <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Payment Method</span>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
                   {paymentMethod === 'CARD_PAYMENT' ? 'Credit/Debit Card' : 'Cash on Delivery'}
+                </span>
+              </div>
+            )}
+            {deliveryFee !== undefined && deliveryFee !== null && (
+              <div>
+                <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Delivery Fee</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: Number(deliveryFee) === 0 ? '#15803d' : '#1e293b' }}>
+                  {Number(deliveryFee) === 0 ? 'Free ($0.00)' : `$${Number(deliveryFee).toFixed(2)}`}
                 </span>
               </div>
             )}

@@ -50,6 +50,43 @@ END$$
 
 
 -- =====================================================================
+-- FUNCTION: fn_calculate_delivery_fee
+-- Calculates delivery fee based on delivery mode and destination city:
+--   STORE_PICKUP        -> $0.00 (Free)
+--   STANDARD_DELIVERY:
+--     Main Texas cities -> $4.99 (Houston, Dallas, Austin, San Antonio, Fort Worth)
+--     Other cities      -> $8.99
+-- =====================================================================
+DROP FUNCTION IF EXISTS fn_calculate_delivery_fee$$
+
+CREATE FUNCTION fn_calculate_delivery_fee(
+    p_destination_city   VARCHAR(80),
+    p_delivery_mode      VARCHAR(40)
+)
+RETURNS DECIMAL(10, 2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    -- Store pickup is free
+    IF UPPER(TRIM(p_delivery_mode)) = 'STORE_PICKUP' THEN
+        RETURN 0.00;
+    END IF;
+
+    -- Standard delivery to a main Texas city: $4.99
+    IF EXISTS (
+        SELECT 1
+        FROM MAIN_CITY
+        WHERE LOWER(TRIM(city_name)) = LOWER(TRIM(p_destination_city))
+    ) THEN
+        RETURN 4.99;
+    ELSE
+        -- Standard delivery to any other city: $8.99
+        RETURN 8.99;
+    END IF;
+END$$
+
+
+-- =====================================================================
 -- TRIGGER: trg_prevent_negative_stock (BEFORE UPDATE)
 -- Only fires its check when stock_quantity is actually changing.
 -- BEFORE triggers run ahead of CHECK constraints, so callers get

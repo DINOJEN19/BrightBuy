@@ -6,6 +6,9 @@ const DeliveryModeSelector = ({
   onSelectMode,
   deliveryAddress,
   onAddressChange,
+  standardFee = 4.99,
+  isMainCity = true,
+  destinationCity = '',
   error,
 }) => {
   return (
@@ -36,14 +39,16 @@ const DeliveryModeSelector = ({
                 borderRadius: '12px',
                 backgroundColor: '#dbeafe',
                 color: '#1d4ed8',
-                fontWeight: '500',
+                fontWeight: '600',
               }}
             >
-              5 - 7 Days
+              ${standardFee.toFixed(2)}
             </span>
           </div>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-            Dispatched to your residential or office address. Required for doorstep delivery.
+            {isMainCity
+              ? `Dispatched to your address in ${destinationCity || 'main city'} (Expedited 5 days • $4.99 rate).`
+              : `Dispatched to your address in ${destinationCity || 'other city'} (Standard 7 days • $8.99 rate).`}
           </p>
         </div>
 
@@ -68,14 +73,14 @@ const DeliveryModeSelector = ({
                 borderRadius: '12px',
                 backgroundColor: '#dcfce7',
                 color: '#15803d',
-                fontWeight: '500',
+                fontWeight: '600',
               }}
             >
-              Free / Fast
+              Free ($0.00)
             </span>
           </div>
           <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
-            Collect in-person from the main BrightBuy store counter in your destination city.
+            Collect in-person from the main BrightBuy store counter in {destinationCity || 'your city'}. No shipping fee.
           </p>
         </div>
       </div>

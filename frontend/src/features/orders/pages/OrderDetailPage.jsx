@@ -65,7 +65,9 @@ const OrderDetailPage = () => {
 
   const items = order.items || [];
   const itemsTotal = items.reduce((sum, it) => sum + Number(it.subtotal || 0), 0);
+  const deliveryFee = Number(order.delivery?.deliveryFee ?? 0);
   const payment = order.payment;
+  const grandTotal = payment?.amount !== undefined ? Number(payment.amount) : itemsTotal + deliveryFee;
 
   return (
     <div style={{ maxWidth: '1000px', margin: '40px auto', padding: '0 20px', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
@@ -96,9 +98,21 @@ const OrderDetailPage = () => {
                 <span style={{ fontWeight: '700', color: '#0f172a' }}>${Number(it.subtotal).toFixed(2)}</span>
               </div>
             ))}
-            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px', alignItems: 'center' }}>
-              <span style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Total</span>
-              <span style={{ fontSize: '20px', fontWeight: '800', color: '#2563eb' }}>${itemsTotal.toFixed(2)}</span>
+            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '16px', marginTop: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '14px', color: '#64748b' }}>
+                <span>Subtotal</span>
+                <span style={{ fontWeight: '500', color: '#0f172a' }}>${itemsTotal.toFixed(2)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '14px', color: '#64748b' }}>
+                <span>Delivery Fee</span>
+                <span style={{ fontWeight: '600', color: deliveryFee === 0 ? '#15803d' : '#0f172a' }}>
+                  {deliveryFee === 0 ? 'Free ($0.00)' : `$${deliveryFee.toFixed(2)}`}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Total Amount</span>
+                <span style={{ fontSize: '20px', fontWeight: '800', color: '#2563eb' }}>${grandTotal.toFixed(2)}</span>
+              </div>
             </div>
           </>
         )}

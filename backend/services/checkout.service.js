@@ -140,10 +140,25 @@ async function placeOrder(customerId, {
       estimatedDeliveryDate = estimatedDeliveryDate.slice(0, 10);
     }
 
+    let totalAmount = undefined;
+    let deliveryFee = undefined;
+    if (result && result.orderId) {
+      const [orderRows] = await conn.query(
+        `SELECT total_amount AS totalAmount, delivery_fee AS deliveryFee FROM CUSTOMER_ORDER WHERE order_id = ?`,
+        [result.orderId]
+      );
+      if (orderRows && orderRows.length > 0) {
+        totalAmount = parseFloat(orderRows[0].totalAmount);
+        deliveryFee = parseFloat(orderRows[0].deliveryFee);
+      }
+    }
+
     return {
       orderId: result.orderId,
       estimatedDeliveryDate,
       orderStatus: 'CONFIRMED',
+      ...(totalAmount !== undefined && { totalAmount }),
+      ...(deliveryFee !== undefined && { deliveryFee }),
     };
   } finally {
     conn.release();

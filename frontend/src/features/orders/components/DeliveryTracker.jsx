@@ -65,6 +65,12 @@ const DeliveryTracker = ({ delivery }) => {
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>{delivery.destinationCity || 'N/A'}</span>
         </div>
         <div>
+          <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Delivery Fee</span>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: Number(delivery.deliveryFee || 0) === 0 ? '#15803d' : '#1e293b' }}>
+            {Number(delivery.deliveryFee || 0) === 0 ? 'Free ($0.00)' : `$${Number(delivery.deliveryFee).toFixed(2)}`}
+          </span>
+        </div>
+        <div>
           <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Estimated delivery</span>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#2563eb' }}>{formatDate(delivery.estimatedDeliveryDate)}</span>
         </div>
