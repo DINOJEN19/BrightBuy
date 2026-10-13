@@ -35,3 +35,36 @@ exports.createStockAdjustment = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+  * GET /api/v1/inventory/stock-adjustments
+  * Auth required: WAREHOUSE_STAFF or ADMIN
+  * Success: 200 { data: [ ...adjustments ] }
+  */
+exports.listStockAdjustments = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const adjustments = await inventoryService.listRecentAdjustments(limit);
+    return res.status(200).json({ data: adjustments });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+  * GET /api/v1/inventory/variants
+  * Auth required: WAREHOUSE_STAFF or ADMIN
+  * Query: ?q=...&limit=30
+  * Success: 200 { data: [ ...variants ] }
+  */
+exports.searchVariants = async (req, res, next) => {
+  try {
+    const q = req.query.q || '';
+    const limit = parseInt(req.query.limit, 10) || 30;
+    const variants = await inventoryService.searchVariants(q, limit);
+    return res.status(200).json({ data: variants });
+  } catch (err) {
+    next(err);
+  }
+};
+
