@@ -36,11 +36,13 @@ async function adjustStock({ variantId, adjustmentType, quantityChange, reason }
     }
 
     // 2. Record the adjustment
+    const finalReason = (reason && reason.trim()) ? reason.trim() : (adjustmentType === 'RESTOCK' ? 'Standard restock' : null);
     const [insertResult] = await conn.query(
       `INSERT INTO STOCK_ADJUSTMENT (variant_id, adjustment_type, quantity_change, reason)
        VALUES (?, ?, ?, ?)`,
-      [variantId, adjustmentType, quantityChange, reason]
+      [variantId, adjustmentType, quantityChange, finalReason]
     );
+
 
     // 3. Read back the new stock level
     const [stockRows] = await conn.query(
@@ -66,4 +68,68 @@ async function adjustStock({ variantId, adjustmentType, quantityChange, reason }
   }
 }
 
-module.exports = { adjustStock };
+/**
+ * Retrieves recent stock adjustments with variant and product details.
+ * @param {number} [limit=20]
+ * @returns {Promise<Array>}
+ */
+async function listRecentAdjustments(limit = 20) {
+  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
+  const [rows] = await pool.query(
+    `SELECT
+       sa.adjustment_id AS adjustmentId,
+       sa.variant_id AS variantId,
+       v.sku,
+       v.variant_name AS variantName,
+       p.product_id AS productId,
+       p.product_name AS productName,
+       sa.adjustment_type AS adjustmentType,
+       sa.quantity_change AS quantityChange,
+       sa.reason,
+       sa.adjustment_date AS adjustmentDate
+     FROM STOCK_ADJUSTMENT sa
+     LEFT JOIN VARIANT v ON v.variant_id = sa.variant_id
+     LEFT JOIN PRODUCT p ON p.product_id = v.product_id
+     ORDER BY sa.adjustment_id DESC
+     LIMIT ?`,
+    [safeLimit]
+  );
+  return rows;
+}
+
+/**
+ * Searches product variants by SKU, variant name, product name, or variant ID.
+ * @param {string} [query='']
+ * @param {number} [limit=30]
+ * @returns {Promise<Array>}
+ */
+async function searchVariants(query = '', limit = 30) {
+  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 30, 1), 100);
+  const q = String(query || '').trim();
+  let sql = `
+    SELECT
+      v.variant_id AS variantId,
+      v.sku,
+      v.variant_name AS variantName,
+      v.stock_quantity AS stockQuantity,
+      v.price,
+      p.product_id AS productId,
+      p.product_name AS productName
+    FROM VARIANT v
+    JOIN PRODUCT p ON p.product_id = v.product_id
+    WHERE v.status = 'ACTIVE'
+  `;
+  const params = [];
+  if (q) {
+    sql += ` AND (v.sku LIKE ? OR v.variant_name LIKE ? OR p.product_name LIKE ? OR CAST(v.variant_id AS CHAR) = ?)`;
+    params.push(`%${q}%`, `%${q}%`, `%${q}%`, q);
+  }
+  sql += ` ORDER BY p.product_name, v.variant_name LIMIT ?`;
+  params.push(safeLimit);
+
+  const [rows] = await pool.query(sql, params);
+  return rows;
+}
+
+module.exports = { adjustStock, listRecentAdjustments, searchVariants };
+
